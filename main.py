@@ -19,7 +19,20 @@ def main():
 
     content = "Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum."
     response = client.models.generate_content(model='gemini-2.5-flash', contents=content)
+    
+    print(f"User prompt: {content}")
+    
+    if response.usage_metadata == None:
+        raise RuntimeError("response Metadata empty")
+    else:
+        # number of tokens in the prompt that was sent to the model:
+        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+        # number of tokens in the model's response:
+        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+
+    print("Response:")
     print(response.text)
+    
 
 
 if __name__ == "__main__":
