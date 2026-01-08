@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from google import genai
 import argparse
 from google.genai import types
+import prompts
+import config
 
 def main():
 
@@ -24,7 +26,11 @@ def main():
 
     request = args.user_prompt
     messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
-    response = client.models.generate_content(model='gemini-2.5-flash', contents=messages)
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=messages,
+        config=types.GenerateContentConfig(system_instruction=prompts.system_prompt,temperature=0),
+        )
     
     if args.verbose:
         print(f"User prompt: {request}")
