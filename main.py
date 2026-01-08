@@ -5,6 +5,9 @@ import argparse
 from google.genai import types
 import prompts
 import config
+import functions.get_files_info
+from call_function import available_functions
+
 
 def main():
 
@@ -29,7 +32,10 @@ def main():
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=messages,
-        config=types.GenerateContentConfig(system_instruction=prompts.system_prompt,temperature=0),
+        config=types.GenerateContentConfig(
+            system_instruction=prompts.system_prompt,
+            temperature=0,
+            tools=[available_functions])
         )
     
     if args.verbose:
@@ -45,7 +51,13 @@ def main():
     
 
     print("Response:")
-    print(response.text)
+    response_lines = []
+    if response.function_calls:
+        for function_call in response.function_calls:
+            response_lines.append(f"Calling function: {function_call.name}({function_call.args})")
+        print("\n".join(response_lines))
+    else:      
+        print(response.text)
     
 
 
