@@ -6,7 +6,7 @@ from google.genai import types
 import prompts
 import config
 import functions.get_files_info
-from call_function import available_functions
+from call_function import available_functions, call_function
 
 
 def main():
@@ -50,16 +50,28 @@ def main():
             print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
     
     
+    # response handling
 
-    print("Response:")
-    response_lines = []
-    if response.function_calls:
-        for function_call in response.function_calls:
-            response_lines.append(f"Calling function: {function_call.name}({function_call.args})")
-        print("\n".join(response_lines))
-    else:      
-        print(response.text)
     
+    print("Response:")
+    if response.function_calls:
+        function_responses = []
+        for function_call in response.function_calls:
+            result = call_function(function_call, args.verbose)
+
+            if not result.parts:
+                raise RuntimeError("Empty parts in function result")
+            if result.parts[0].function_response is None:
+                raise RuntimeError("Missing function_response in function result")
+            if result.parts[0].function_response.response is None:
+                raise RuntimeError("Missing response in function_response")
+
+            if args.verbose:
+                print(f"-> {result.parts[0].function_response.response}")
+
+            function_responses.append(result.parts[0])
+    else:
+        print(response.text)
 
 
 if __name__ == "__main__":
