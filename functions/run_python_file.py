@@ -1,5 +1,6 @@
 import os
 import subprocess
+from google.genai import types
 
 def run_python_file(working_directory, file_path, args=None):
 
@@ -46,3 +47,25 @@ def run_python_file(working_directory, file_path, args=None):
 
     except Exception as e:
         return f"Error: executing Python file: {e}"
+
+# Define how LLM can use the function above
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Run a python file give a file path and optional arguments",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="file path to the python script to run",
+            ),
+            "args": types.Schema(
+                type=types.Type.ARRAY,
+                items = types.Schema(type=types.Type.STRING),
+                description="array of arguments to be given with the python script execution"
+            ),
+        },
+        required=["file_path"],
+
+    ),
+)
